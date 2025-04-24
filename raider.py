@@ -6,29 +6,30 @@ import json
 from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
+from discord.ui import Button, View
 
 intents = discord.Intents.default()
-intents.message_content = True  # ეს საჭიროა, რომ ბოტმა წაიკითხოს შეტყობინებები
+intents.message_content = True  # ამისთვის საჭიროა, რომ ბოტი მიიღოს შეტყობინებები
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Slash Command-ის რეგისტრაცია
+# Slash Command რეგისტრაცია
 @bot.tree.command(name="spamraid")
 async def spamraid(interaction: discord.Interaction):
-    # აქ ჩვენ ვქმნით ღილაკს
+    # ღილაკი
     button = Button(label="SPAM", style=discord.ButtonStyle.red)
 
-    # ღილაკს ვაკეთებთ რეაქციაზე
+    # ღილაკის callback ფუნქცია
     async def button_callback(interaction):
-        for _ in range(5):  # ბოტი 5-ჯერ დააფიქსირებს "Spamraid"
+        for _ in range(5):
             await interaction.channel.send("Spamraid!")
         await interaction.response.send_message("5-ჯერ გაისმა Spamraid!", ephemeral=True)
-    
-    button.callback = button_callback  # ღილაკის რეაქცია
+
+    button.callback = button_callback  # ღილაკის რეაგცია
     view = View()  # ივიუ (view), რომელიც დაემატება ღილაკს
     view.add_item(button)
 
-    # დავწერთ შეტყობინებას ღილაკით
+    # გასაყვანად შეტყობინება ღილაკით
     await interaction.response.send_message("დააჭირე ღილაკზე SPAM!", view=view)
 
 @bot.event
