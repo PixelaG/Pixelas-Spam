@@ -7,18 +7,6 @@ from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
 
-@bot.event
-async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
-
-# წამოიღე ტოკენი გარემოდან
-token = os.getenv("DISCORD_TOKEN")
-
-if token:
-    bot.run(token)
-else:
-    print("❌ Token not found. Please set the 'DISCORD_TOKEN' environment variable.")
-
 app = Flask(__name__)
 
 
@@ -132,6 +120,14 @@ async def on_ready():
     except Exception as e:
         display_status(False)
         print(Fore.RED + f"Error during synchronization: {e}")
+
+
+token = os.getenv("DISCORD_TOKEN")
+
+if token:
+    bot.run(token)
+else:
+    print("❌ Token not found. Please set the 'DISCORD_TOKEN' environment variable.")
 
 
 if __name__ == "__main__":
