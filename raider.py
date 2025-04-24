@@ -2,10 +2,30 @@ import os
 import discord
 from discord.ext import commands
 from discord import app_commands
+from flask import Flask
+from threading import Thread
 from colorama import init, Fore
 
 # Colorama init
 init(autoreset=True)
+
+# Flask setup
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=8080)
+
+# Start Flask in a separate thread
+def keep_alive():
+    thread = Thread(target=run_flask)
+    thread.daemon = True
+    thread.start()
+
+keep_alive()
 
 # Discord bot setup
 intents = discord.Intents.default()
