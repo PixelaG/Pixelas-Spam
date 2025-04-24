@@ -48,7 +48,7 @@ class SpamButton(discord.ui.View):
         for _ in range(5):
             await interaction.followup.send(self.message)
 
-@bot.tree.command(name="spamraid", description="Send a message and generate a button to spam")
+@bot.tree.command(name="spamraid", description="გაგზავნეთ შეტყობინება და შექმენით ღილაკი სპამისთვის")
 @app_commands.describe(message="The message you want to spam")
 async def spamraid(interaction: discord.Interaction, message: str):
     view = SpamButton(message)
