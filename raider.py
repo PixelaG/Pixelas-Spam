@@ -9,28 +9,34 @@ from threading import Thread
 from discord.ui import Button, View
 
 intents = discord.Intents.default()
-intents.message_content = True  # ამისთვის საჭიროა, რომ ბოტი მიიღოს შეტყობინებები
+intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Slash Command რეგისტრაცია
+# Slash Command
 @bot.tree.command(name="spamraid")
 async def spamraid(interaction: discord.Interaction):
-    # ღილაკი
     button = Button(label="SPAM", style=discord.ButtonStyle.red)
 
-    # ღილაკის callback ფუნქცია
+    # Callback for button press
     async def button_callback(interaction):
+        # Check permissions before sending
+        channel_permissions = interaction.channel.permissions_for(interaction.guild.me)
+        if not channel_permissions.send_messages:
+            await interaction.response.send_message("I don't have permission to send messages here.", ephemeral=True)
+            return
+
+        # Send 5 messages
         for _ in range(5):
             await interaction.channel.send("Spamraid!")
-        await interaction.response.send_message("5-ჯერ გაისმა Spamraid!", ephemeral=True)
+        await interaction.response.send_message("5 messages sent successfully!", ephemeral=True)
 
-    button.callback = button_callback  # ღილაკის რეაგცია
-    view = View()  # ივიუ (view), რომელიც დაემატება ღილაკს
+    button.callback = button_callback
+    view = View()
     view.add_item(button)
 
-    # გასაყვანად შეტყობინება ღილაკით
-    await interaction.response.send_message("დააჭირე ღილაკზე SPAM!", view=view)
+    # Send message with button
+    await interaction.response.send_message("Press the SPAM button!", view=view)
 
 @bot.event
 async def on_ready():
