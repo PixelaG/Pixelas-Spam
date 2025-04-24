@@ -7,14 +7,16 @@ from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
 
-bot = commands.Bot(command_prefix='!', intents=commands.Intents.all())
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-# შენი კომანდები ან ივენთები (მაგალითად)
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
+# წამოიღე ტოკენი გარემოდან
 token = os.getenv("DISCORD_TOKEN")
+
 if token:
     bot.run(token)
 else:
