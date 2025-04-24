@@ -7,6 +7,13 @@ from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
 
+bot = commands.Bot(command_prefix='!', intents=commands.Intents.all())
+
+# შენი კომანდები ან ივენთები (მაგალითად)
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in as {bot.user}")
+
 token = os.getenv("DISCORD_TOKEN")
 if token:
     bot.run(token)
