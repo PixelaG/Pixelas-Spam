@@ -1,38 +1,30 @@
+import os
+import json
 import discord
 from discord.ext import commands
 from discord import app_commands
-import os
-import json
-from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
+from colorama import init, Fore
 
-token = os.getenv("DISCORD_TOKEN")
+# Colorama init
+init(autoreset=True)
 
-if token:
-    bot.run(token)
-else:
-    print("❌ Token not found. Please set the 'DISCORD_TOKEN' environment variable.")
-
+# Flask setup
 app = Flask(__name__)
-
 
 @app.route('/')
 def home():
     return "Bot is alive!"
 
-
-def run():
+def run_flask():
     app.run(host='0.0.0.0', port=8080)
 
-
 def keep_alive():
-    t = Thread(target=run)
-    t.start()
+    thread = Thread(target=run_flask)
+    thread.start()
 
 keep_alive()
-
-init(autoreset=True)
 
 
 def save_token(token):
@@ -92,60 +84,37 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 class SpamButton(discord.ui.View):
-
     def __init__(self, message):
         super().__init__()
         self.message = message
 
     @discord.ui.button(label="Spam", style=discord.ButtonStyle.red)
-    async def spam_button(self, interaction: discord.Interaction,
-                          button: discord.ui.Button):
+    async def spam_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         for _ in range(5):
             await interaction.followup.send(self.message)
 
 
-@bot.tree.command(name="spamraid",
-                  description="Send a message and generate a button to spam")
+@bot.tree.command(name="spamraid", description="Send a message and generate a button to spam")
 @app_commands.describe(message="The message you want to spam")
 async def spamraid(interaction: discord.Interaction, message: str):
     view = SpamButton(message)
-    await interaction.response.send_message(f"💥SPAM TEXT💥 : {message}",
-                                            view=view,
-                                            ephemeral=True)
+    await interaction.response.send_message(f"💥 SPAM TEXT 💥 : {message}", view=view, ephemeral=True)
 
 
 @bot.event
 async def on_ready():
-    display_logo()
-    display_status(True)
-    print("Connected as " + Fore.YELLOW + f"{bot.user}")
-
+    print(Fore.GREEN + f"✅ Bot connected as {bot.user}")
     try:
         await bot.tree.sync()
-        print(Fore.GREEN + "Commands successfully synchronized.")
+        print(Fore.GREEN + "✅ Slash commands synced successfully.")
     except Exception as e:
-        display_status(False)
-        print(Fore.RED + f"Error during synchronization: {e}")
+        print(Fore.RED + f"❌ Failed to sync commands: {e}")
 
 
 if __name__ == "__main__":
-    TOKEN = token_management()
-    if TOKEN:
-        try:
-            bot.run(token)
-        except discord.errors.LoginFailure:
-            print(Fore.RED +
-                  "Can't connect to token. Please check your token.")
-            input(Fore.YELLOW + "Press Enter to go back to the menu...")
-            TOKEN = token_management()  # Restart the token selection process
-            if TOKEN:
-                bot.run(token)  # Run again with the new token
-        except Exception as e:
-            print(Fore.RED + f"An unexpected error occurred: {e}")
-            input(Fore.YELLOW + "Press Enter to restart the menu...")
-            TOKEN = token_management()  # Restart the token selection process
-            if TOKEN:
-                bot.run(token)  # Run again with the new token
+    token = os.getenv("DISCORD_TOKEN")
+    if token:
+        bot.run(token)
     else:
-        print(Fore.RED + "❌ Error: Unable to load or set a token.")
+        print(Fore.RED + "❌ DISCORD_TOKEN environment variable is not set.")
