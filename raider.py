@@ -7,8 +7,15 @@ from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
 
-intents = discord.Intents.all()
+intents = discord.Intents.default()
+intents.message_content = True  # ეს საჭიროა, რომ ბოტმა წაიკითხოს შეტყობინებები
+
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Slash Command-ის რეგისტრაცია
+@bot.tree.command(name="spamraid")
+async def spamraid(interaction: discord.Interaction):
+    await interaction.response.send_message("Spamraid დაიწყო!")
 
 @bot.event
 async def on_ready():
