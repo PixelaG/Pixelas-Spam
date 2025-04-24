@@ -15,7 +15,21 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # Slash Command-ის რეგისტრაცია
 @bot.tree.command(name="spamraid")
 async def spamraid(interaction: discord.Interaction):
-    await interaction.response.send_message("Spamraid დაიწყო!")
+    # აქ ჩვენ ვქმნით ღილაკს
+    button = Button(label="SPAM", style=discord.ButtonStyle.red)
+
+    # ღილაკს ვაკეთებთ რეაქციაზე
+    async def button_callback(interaction):
+        for _ in range(5):  # ბოტი 5-ჯერ დააფიქსირებს "Spamraid"
+            await interaction.channel.send("Spamraid!")
+        await interaction.response.send_message("5-ჯერ გაისმა Spamraid!", ephemeral=True)
+    
+    button.callback = button_callback  # ღილაკის რეაქცია
+    view = View()  # ივიუ (view), რომელიც დაემატება ღილაკს
+    view.add_item(button)
+
+    # დავწერთ შეტყობინებას ღილაკით
+    await interaction.response.send_message("დააჭირე ღილაკზე SPAM!", view=view)
 
 @bot.event
 async def on_ready():
