@@ -13,18 +13,13 @@ init(autoreset=True)
 # Flask setup
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return "Bot is alive!"
-
-def run_flask():
-    app.run(host='0.0.0.0', port=8080)
-
 def keep_alive():
-    thread = Thread(target=run_flask)
-    thread.start()
-
-keep_alive()
+    try:
+        thread = Thread(target=run_flask)
+        thread.daemon = True
+        thread.start()
+    except Exception as e:
+        print("Flask error:", e)
 
 
 def save_token(token):
@@ -50,28 +45,6 @@ def display_status(connected):
         print(Fore.GREEN + "Status: Connected")
     else:
         print(Fore.RED + "Status: Disconnected")
-
-
-def load_token():
-    try:
-        with open("token.json", "r") as file:
-            data = json.load(file)
-            return data.get("token")
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
-
-
-def token_management():
-    os.system('cls' if os.name == 'nt' else 'clear')  # Clears the console
-    print(Fore.CYAN + "Automatically loading token...\n")
-
-    token = load_token()
-    if token:
-        print(Fore.GREEN + f"Token loaded successfully: {token}")
-        return token
-    else:
-        print(Fore.RED + "No token found in token.json.")
-        return None
 
 
 intents = discord.Intents.default()
