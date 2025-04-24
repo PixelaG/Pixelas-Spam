@@ -42,7 +42,7 @@ class SpamButton(discord.ui.View):
         super().__init__()
         self.message = message
 
-    @discord.ui.button(label="Spam", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.red)
     async def spam_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         for _ in range(5):
@@ -52,7 +52,7 @@ class SpamButton(discord.ui.View):
 @app_commands.describe(message="The message you want to spam")
 async def spamraid(interaction: discord.Interaction, message: str):
     view = SpamButton(message)
-    await interaction.response.send_message(f"💥 SPAM TEXT 💥 : {message}", view=view, ephemeral=True)
+    await interaction.response.send_message(f"💥 გასასპამი ტექსტი 💥 : {message}", view=view, ephemeral=True)
 
 # Event when bot is ready
 @bot.event
