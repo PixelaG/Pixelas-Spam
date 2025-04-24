@@ -7,6 +7,18 @@ from colorama import init, Fore, Style
 from flask import Flask
 from threading import Thread
 
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in as {bot.user}")
+
+# წამოიღე ტოკენი გარემოდან
+token = os.getenv("DISCORD_TOKEN")
+
+if token:
+    bot.run(token)
+else:
+    print("❌ Token not found. Please set the 'DISCORD_TOKEN' environment variable.")
+
 app = Flask(__name__)
 
 
@@ -126,19 +138,19 @@ if __name__ == "__main__":
     TOKEN = token_management()
     if TOKEN:
         try:
-            bot.run(TOKEN)
+            bot.run(token)
         except discord.errors.LoginFailure:
             print(Fore.RED +
                   "Can't connect to token. Please check your token.")
             input(Fore.YELLOW + "Press Enter to go back to the menu...")
             TOKEN = token_management()  # Restart the token selection process
             if TOKEN:
-                bot.run(TOKEN)  # Run again with the new token
+                bot.run(token)  # Run again with the new token
         except Exception as e:
             print(Fore.RED + f"An unexpected error occurred: {e}")
             input(Fore.YELLOW + "Press Enter to restart the menu...")
             TOKEN = token_management()  # Restart the token selection process
             if TOKEN:
-                bot.run(TOKEN)  # Run again with the new token
+                bot.run(token)  # Run again with the new token
     else:
         print(Fore.RED + "❌ Error: Unable to load or set a token.")
