@@ -40,7 +40,7 @@ intents.presences = False
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-# Improved embed notification function
+# Embed notification function
 async def send_embed_notification(interaction,
                                   title,
                                   description,
@@ -58,7 +58,35 @@ async def send_embed_notification(interaction,
         print(f"⚠ HTTP შეცდომა Embed-ის გაგზავნისას: {e}")
 
 
-# SpamButton class (multi-spam)
+# Permissions check helper
+async def check_user_permissions(interaction: discord.Interaction,
+                                 required_role_id: int, guild_id: int):
+    home_guild = discord.utils.get(bot.guilds, id=guild_id)
+    if not home_guild:
+        await send_embed_notification(interaction,
+                                      "⚠️ მთავარი სერვერი არ არის ნაპოვნი",
+                                      "⌚️ სცადეთ მოგვიანებით.")
+        return None
+
+    try:
+        member = await home_guild.fetch_member(interaction.user.id)
+    except discord.NotFound:
+        await send_embed_notification(
+            interaction, "⛔️ თქვენ არ ხართ მთავარ სერვერზე",
+            "🌐 შემოგვიერთდით ახლავე [Server](https://discord.gg/byScSM6T9Q)")
+        return None
+
+    if not any(role.id == required_role_id for role in member.roles):
+        await send_embed_notification(
+            interaction, "🚫 თქვენ არ შეგიძლიათ ამ ფუნქციის გამოყენება",
+            "💸 შესაძენად ეწვიეთ სერვერს [Server](https://discord.gg/byScSM6T9Q) 💸"
+        )
+        return None
+
+    return member
+
+
+# SpamButton class
 class SpamButton(discord.ui.View):
 
     def __init__(self, message):
@@ -92,11 +120,9 @@ class SingleUseButton(discord.ui.View):
         self.sent = True
         button.disabled = True
 
-        # Send message and store reference to sent message
         await interaction.response.defer()
         sent_message = await interaction.followup.send(self.message)
 
-        # Try editing the original ephemeral message (the one that has the button)
         try:
             original_message = await interaction.original_response()
             await original_message.edit(view=self)
@@ -114,28 +140,10 @@ class SingleUseButton(discord.ui.View):
 async def spamraid(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
-    home_guild = discord.utils.get(
-        bot.guilds, id=1005186618031869952)  # შეცვალე შენი სერვერის ID
-    if not home_guild:
-        await send_embed_notification(interaction,
-                                      "⚠️ მთავარი სერვერი არ არის ნაპოვნი",
-                                      "⌚️ სცადეთ მოგვიანებით.")
-        return
-
-    try:
-        member = await home_guild.fetch_member(interaction.user.id)
-    except discord.NotFound:
-        await send_embed_notification(
-            interaction, "⛔️ თქვენ არ ხართ მთავარ სერვერზე",
-            "🌐 შემოგვიერთდით ახლავე [Server](https://discord.gg/byScSM6T9Q)")
-        return
-
-    if not any(role.id == 1365076710265192590
-               for role in member.roles):  # შეცვალე შენი როლის ID
-        await send_embed_notification(
-            interaction, "🚫 თქვენ არ შეგიძლიათ ამ ფუნქციის გამოყენება",
-            "💸 შესაძენად ეწვიეთ სერვერს [Server](https://discord.gg/byScSM6T9Q) 💸"
-        )
+    member = await check_user_permissions(interaction,
+                                          required_role_id=1365076710265192590,
+                                          guild_id=1005186618031869952)
+    if not member:
         return
 
     embed = discord.Embed(title="💥 გასასპამი ტექსტი 💥",
@@ -159,26 +167,10 @@ async def spamraid(interaction: discord.Interaction, message: str):
 async def onlyone(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
-    home_guild = discord.utils.get(bot.guilds, id=1005186618031869952)
-    if not home_guild:
-        await send_embed_notification(interaction,
-                                      "⚠️ მთავარი სერვერი არ არის ნაპოვნი",
-                                      "⌚️ სცადეთ მოგვიანებით.")
-        return
-
-    try:
-        member = await home_guild.fetch_member(interaction.user.id)
-    except discord.NotFound:
-        await send_embed_notification(
-            interaction, "⛔️ თქვენ არ ხართ მთავარ სერვერზე",
-            "🌐 შემოგვიერთდით ახლავე [Server](https://discord.gg/byScSM6T9Q)")
-        return
-
-    if not any(role.id == 1365076710265192590 for role in member.roles):
-        await send_embed_notification(
-            interaction, "🚫 თქვენ არ შეგიძლიათ ამ ფუნქციის გამოყენება",
-            "💸 შესაძენად ეწვიეთ სერვერს [Server](https://discord.gg/byScSM6T9Q) 💸"
-        )
+    member = await check_user_permissions(interaction,
+                                          required_role_id=1365076710265192590,
+                                          guild_id=1005186618031869952)
+    if not member:
         return
 
     embed = discord.Embed(title="🟢 ერთჯერადი გაგზავნის ღილაკი",
