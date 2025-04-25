@@ -170,34 +170,38 @@ async def onlyone(interaction: discord.Interaction, message: str):
         print("⚠ Interaction ვადა გასულია (onlyone).")
 
 # /dmmsg command with cooldown
+@bot.tree.command(name="dmmsg", description="გაგზავნე DM არჩეულ მომხმარებელზე")
 @app_commands.describe(
     user="მომხმარებელი, რომელსაც გსურს პირადში მიწერა",
     message="შეტყობინება რომელიც გსურს რომ გააგზავნო"
 )
-@bot.tree.command(name="dmmsg", description="გაგზავნე DM არჩეულ მომხმარებელზე")
-@dm_cooldown(300)  # 5 წუთი
 async def dmmsg(interaction: discord.Interaction, user: discord.User, message: str):
     await bot.wait_until_ready()
 
+    # Cooldown შემოწმება
+    seconds = 300  # 5 წუთი
+    user_id = interaction.user.id
+    now = time.time()
+    last_used = cooldowns.get(user_id, 0)
+
+    if now - last_used < seconds:
+        remaining = int(seconds - (now - last_used))
+        await send_embed_notification(interaction, "⏱ Cooldown აქტიურია", f"გთხოვთ დაელოდოთ {remaining} წამს ბრძანების ხელახლა გამოსაყენებლად.")
+        return
+
+    # უფლებების შემოწმება
     member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
     if not member:
         return
 
     try:
         await user.send(message)
+        cooldowns[user_id] = now  # ✅ მხოლოდ წარმატების შემთხვევაში ვანახლებთ cooldown-ს
         await send_embed_notification(interaction, "✅ შეტყობინება გაგზავნილია", f"{user.mention}-ს მივწერეთ პირადში.")
     except discord.Forbidden:
         await send_embed_notification(interaction, "🚫 ვერ მოხერხდა გაგზავნა", f"{user.mention} არ იღებს პირად შეტყობინებებს.")
     except discord.HTTPException as e:
         await send_embed_notification(interaction, "❌ შეცდომა შეტყობინების გაგზავნისას", f"დეტალები: {e}")
-
-# Error handler for slash commands
-@bot.tree.error
-async def on_app_command_error(interaction: discord.Interaction, error):
-    if isinstance(error, app_commands.CheckFailure):
-        await send_embed_notification(interaction, "⏱ Cooldown აქტიურია", str(error))
-    else:
-        await send_embed_notification(interaction, "❌ დაუმუშავებელი შეცდომა", str(error))
 
 # Bot ready
 @bot.event
