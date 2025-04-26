@@ -212,30 +212,30 @@ async def check_expired_roles():
     if not guild:
         return
 
-    now = int(time.time())
+    now = datetime.utcnow()
 
-    for doc in collection.find():
-        user_id = str(doc["user_id"])
-        expires_at = doc.get("expires_at")
+    # მოვძებნოთ ვადაგასული როლები
+    expired_users = role_expiry_collection.find({"expires_at": {"$lte": now}})
 
-        if isinstance(expires_at, str):
-            expires_at = datetime.fromisoformat(expires_at)
-        if isinstance(expires_at, datetime):
-            expires_at = int(expires_at.timestamp())
+    for user_data in expired_users:
+        user_id = int(user_data["user_id"])
+        try:
+            member = await guild.fetch_member(user_id)
+        except discord.NotFound:
+            continue
 
-        if now >= expires_at:
+        role = guild.get_role(BUYER_ROLE_ID)
+        if role in member.roles:
             try:
-                member = await guild.fetch_member(int(user_id))
-            except discord.NotFound:
-                continue
-
-            role = guild.get_role(BUYER_ROLE_ID)
-
-            if role in member.roles:
                 await member.remove_roles(role)
                 print(f"✅ {member.display_name}-ს წაეშალა მყიდველის როლი.")
+            except discord.Forbidden:
+                print(f"⛔ ვერ მოვხსენით როლი {member.display_name}-ს – არ გვაქვს შესაბამისი უფლებები.")
+            except Exception as e:
+                print(f"❌ შეცდომა {member.display_name}-სთან მუშაობისას: {e}")
 
-            delete_expiry(user_id)
+        # ამოიშლება ჩანაწერი მონაცემთა ბაზიდან
+        role_expiry_collection.delete_one({"user_id": str(user_id)})
 
     for user_id in to_remove:
         del role_expiries[user_id]
