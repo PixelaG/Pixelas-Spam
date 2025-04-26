@@ -51,9 +51,7 @@ LOG_CHANNEL_ID = 1365381000619622460  # შეცვალე შენი ა�
 # MongoDB role expiry handlers
 def load_expiries():
     expiries = {}
-    print(f"🔍 Accessing role_expiry_collection...")
     for doc in role_expiry_collection.find():
-        print(f"Found expiry for user: {doc['user_id']}")
         user_id = str(doc["user_id"])
         expiries[user_id] = {
             "guild_id": doc["guild_id"],
@@ -63,10 +61,10 @@ def load_expiries():
     return expiries
 
 def save_expiry(user_id, data):
-    collection.update_one({"user_id": int(user_id)}, {"$set": data}, upsert=True)
+    role_expiry_collection.update_one({"user_id": int(user_id)}, {"$set": data}, upsert=True)
 
 def delete_expiry(user_id):
-    collection.delete_one({"user_id": int(user_id)})
+    role_expiry_collection.delete_one({"user_id": int(user_id)})
 
 
 role_expiries = load_expiries()
