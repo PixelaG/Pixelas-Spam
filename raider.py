@@ -37,7 +37,7 @@ def keep_alive():
 keep_alive()
 
 # MongoDB setup
-MONGO_URI = os.getenv("mongodb+srv://Gio:GU4J6t5ImzomWXsj@cluster0.c6gghbg.mongodb.net/?retryWrites=true&w=majority")
+MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["discord_bot"]
 collection = db["role_expiries"]
