@@ -287,27 +287,26 @@ async def buy(ctx, member: discord.Member, duration: str = "30d"):
 @bot.command(name="check")
 @commands.has_permissions(administrator=True)
 async def check_role(ctx, member: discord.Member = None):
+    # თუ მომხმარებელი არ არის მითითებული, შეცდომის შეტყობინება გავაგზავნოთ მხოლოდ ერთხელ
     if member is None:
         await ctx.send(
             "# ⛔️ შეცდომა : გთხოვთ მიუთითოთ მომხმარებელი, რომლის როლსაც ამოწმებთ. "
-            "გამოიყენეთ ბრძანება ასე: `!check @user`.")
+            "გამოიყენეთ ბრძანება ასე: `!check @user`."
+        )
         return
 
+    # მონაცემთა ბაზიდან როლის მონაცემები
     data = role_expiries.get(str(member.id))
     if not data:
-        await ctx.send(f"# ℹ️ {member.display_name}-ს არ აქვს აქტიური სერვისი."
-                       )
+        await ctx.send(f"# ℹ️ {member.display_name}-ს არ აქვს აქტიური სერვისი.")
         return
 
     expires_at = data.get("expires_at")
 
-    # დარწმუნდით რომ expires_at არის datetime ობიექტი, თუ არა, გადააკეთეთ
     if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(
-            expires_at)  # ISO 8601 ფორმატიდან datetime-ში
+        expires_at = datetime.fromisoformat(expires_at)
     if isinstance(expires_at, datetime):
-        expires_at = int(
-            expires_at.timestamp())  # datetime-დან timestamp-ში გადავყავთ
+        expires_at = int(expires_at.timestamp())
 
     now = int(time.time())
 
@@ -323,7 +322,8 @@ async def check_role(ctx, member: discord.Member = None):
     await ctx.send(
         f"📋 {member.mention}-ს **მყიდველის როლი** მოქმედებს\n"
         f"⏳ დარჩენილი დრო: {days} დღე, {hours} საათი, {minutes} წუთი\n"
-        f"📅 იწურება: <t:{expires_at}:F>")
+        f"📅 იწურება: <t:{expires_at}:F>"
+    )
 
 
 # /spamraid command
