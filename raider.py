@@ -40,7 +40,8 @@ keep_alive()
 MONGO_URI = os.getenv("MONGO_URI")
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["discord_bot"]
-collection = db["role_expiries"]
+role_expiry_collection = db["role_expiries"]
+
 
 # Constants
 BUYER_ROLE_ID = 1365076710265192590
