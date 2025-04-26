@@ -10,6 +10,7 @@ from flask import Flask
 from threading import Thread
 from colorama import init, Fore
 from datetime import datetime, timedelta
+from pymongo import MongoClient
 
 # Colorama init
 init(autoreset=True)
@@ -35,23 +36,34 @@ def keep_alive():
 
 keep_alive()
 
+# MongoDB setup
+MONGO_URI = os.getenv("MONGO_URI")
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client["discord_bot"]
+collection = db["role_expiries"]
+
 # Constants
-ROLE_EXPIRY_FILE = "role_expiry.json"
 BUYER_ROLE_ID = 1365076710265192590
 LOG_CHANNEL_ID = 1365381000619622460  # შეცვალე შენი არხით
 
 
-# Role expiry data loading/saving
+# MongoDB role expiry handlers
 def load_expiries():
-    if os.path.exists(ROLE_EXPIRY_FILE):
-        with open(ROLE_EXPIRY_FILE, "r") as f:
-            return json.load(f)
-    return {}
+    expiries = {}
+    for doc in collection.find():
+        user_id = str(doc["user_id"])
+        expiries[user_id] = {
+            "guild_id": doc["guild_id"],
+            "role_id": doc["role_id"],
+            "expires_at": doc["expires_at"]
+        }
+    return expiries
 
+def save_expiry(user_id, data):
+    collection.update_one({"user_id": int(user_id)}, {"$set": data}, upsert=True)
 
-def save_expiries(data):
-    with open(ROLE_EXPIRY_FILE, "w") as f:
-        json.dump(data, f)
+def delete_expiry(user_id):
+    collection.delete_one({"user_id": int(user_id)})
 
 
 role_expiries = load_expiries()
@@ -192,11 +204,6 @@ def parse_duration(duration_str):
     return total_seconds
 
 
-def save_expiries(role_expiries):
-    with open("role_expiries.json", "w") as f:
-        json.dump(role_expiries, f, indent=4, default=str)
-
-
 @tasks.loop(minutes=1)
 async def check_expired_roles():
     await bot.wait_until_ready()
@@ -207,10 +214,9 @@ async def check_expired_roles():
 
     now = int(time.time())
 
-    to_remove = []
-
-    for user_id, data in role_expiries.items():
-        expires_at = data.get("expires_at")
+    for doc in collection.find():
+        user_id = str(doc["user_id"])
+        expires_at = doc.get("expires_at")
 
         if isinstance(expires_at, str):
             expires_at = datetime.fromisoformat(expires_at)
@@ -229,7 +235,7 @@ async def check_expired_roles():
                 await member.remove_roles(role)
                 print(f"✅ {member.display_name}-ს წაეშალა მყიდველის როლი.")
 
-            to_remove.append(user_id)
+            delete_expiry(user_id)
 
     for user_id in to_remove:
         del role_expiries[user_id]
@@ -246,32 +252,28 @@ async def buy(ctx, member: discord.Member, duration: str = "30d"):
 
     seconds = parse_duration(duration)
     if seconds <= 0:
-        await ctx.send(
-            "⛔️ შეცდომა : არასწორი დროის ფორმატი. გამოიყენე მაგ: `14d`, `5h`, `30m`"
-        )
+        await ctx.send("⛔️ შეცდომა : არასწორი დროის ფორმატი. გამოიყენე მაგ: `14d`, `5h`, `30m`")
         return
 
     try:
         await member.add_roles(role, reason=f"გადახდა: {duration}")
         expires_at = datetime.utcnow() + timedelta(seconds=seconds)
 
-        role_expiries[str(member.id)] = {
+        save_expiry(member.id, {
+            "user_id": member.id,
             "guild_id": ctx.guild.id,
             "role_id": BUYER_ROLE_ID,
             "expires_at": expires_at.isoformat()
-        }
-        save_expiries(role_expiries)
+        })
 
         log_channel = ctx.guild.get_channel(LOG_CHANNEL_ID)
         if log_channel:
             await log_channel.send(
-                f"# 💰 {member.mention}-ს მიენიჭა **მყიდველის როლი** {duration}-ით\n📅 ვადა: {expires_at}"
-            )
+                f"# 💰 {member.mention}-ს მიენიჭა **მყიდველის როლი** {duration}-ით\n📅 ვადა: {expires_at}")
 
-        await ctx.send(f"🟢 როლი მიენიჭა {member.mention}-ს {duration}-ით.")
+        await ctx.send(f"# 🟢 როლი მიენიჭა {member.mention}-ს {duration}-ით.")
     except Exception as e:
-        await ctx.send(f"❌ შეცდომა: {e}")
-
+        await ctx.send(f"⛔️ შეცდომა : {e}")
 
 # Command to check role expiry
 @bot.command(name="check")
@@ -425,10 +427,6 @@ async def on_ready():
     except Exception as e:
         print(Fore.RED + f"❌ Failed to sync commands: {e}")
 
-    # Start checking role expirations
-
-
-# Run bot
 if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
     if token:
