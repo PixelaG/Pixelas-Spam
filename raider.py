@@ -217,7 +217,10 @@ async def check_expired_roles():
 
     now = datetime.utcnow()
 
-    # მოვძებნოთ ვადაგასული როლები
+    # Create the list to hold the user IDs of expired users
+    to_remove = []
+
+    # Find expired roles
     expired_users = role_expiry_collection.find({"expires_at": {"$lte": now}})
 
     for user_data in expired_users:
@@ -237,12 +240,14 @@ async def check_expired_roles():
             except Exception as e:
                 print(f"❌ შეცდომა {member.display_name}-სთან მუშაობისას: {e}")
 
-        # ამოიშლება ჩანაწერი მონაცემთა ბაზიდან
-        role_expiry_collection.delete_one({"user_id": str(user_id)})
+        # Add user ID to the to_remove list
+        to_remove.append(str(user_id))  # Append as string to match the format in role_expiries
 
+    # After processing expired roles, delete them from the database
     for user_id in to_remove:
-        del role_expiries[user_id]
-        save_expiries(role_expiries)
+        role_expiry_collection.delete_one({"user_id": user_id})
+        del role_expiries[user_id]  # Remove from the in-memory dictionary as well
+        save_expiries(role_expiries)  # Ensure the updated expiries are saved
 
 
 @bot.command(name="buy")
