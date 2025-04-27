@@ -1,3 +1,5 @@
 discord.py
 colorama
 flask
+motor
+pymongo
