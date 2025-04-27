@@ -224,7 +224,6 @@ async def spamraid(interaction: discord.Interaction, message: str):
 async def onlyone(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
-    # შეამოწმეთ წევრის უფლებები
     member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
     if not member:
         return
@@ -234,7 +233,6 @@ async def onlyone(interaction: discord.Interaction, message: str):
 
     view = SingleUseButton(message)
     try:
-        # შევცვალოთ reply-დან send_message-ზე
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
     except discord.NotFound:
         print("⚠ Interaction ვადა გასულია (onlyone).")
