@@ -160,27 +160,27 @@ class SpamButton(discord.ui.View):
         self.last_clicked = {}  # user_id: timestamp
 
     @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
-    async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
-        user_id = interaction.user.id
-        now = time.time()
+async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
+    user_id = interaction.user.id
+    now = time.time()
 
-        last_time = self.last_clicked.get(user_id, 0)
+    last_time = self.last_clicked.get(user_id, 0)
 
-        if now - last_time < 2:  # თუ 2 წამზე ნაკლებია გასული
-            await interaction.response.send_message(
-                "გთხოვთ დაელოდოთ 2 წამი სანამ ისევ დააჭერთ.", 
-                ephemeral=True  # private მესიჯად
-            )
-            return
+    if now - last_time < 2:  # თუ 2 წამზე ნაკლებია
+        await interaction.response.send_message(
+            "გთხოვთ დაელოდოთ 2 წამი სანამ ისევ დააჭერთ.", 
+            ephemeral=True
+        )
+        return
 
-        # დავიმახსოვროთ ახალი დრო
-        self.last_clicked[user_id] = now
+    self.last_clicked[user_id] = now
 
-        # გააგზავნე ის შეტყობინება
+    # Interaction დავხუროთ
+    await interaction.response.defer(thinking=False)
+
+    # 5-ჯერ გავაგზავნოთ შეტყობინება
+    for _ in range(5):
         await interaction.channel.send(self.message_content)
-
-        # და პასუხი interaction-ზე, რომ ღილაკი იმუშაოს სწორად
-        await interaction.response.defer()  # არაფერი არ აჩვენოს
 
 # Single-use button
 class SingleUseButton(discord.ui.View):
