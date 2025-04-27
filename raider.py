@@ -3,6 +3,7 @@ import time
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord.ui import Button, View
 from flask import Flask
 from threading import Thread
 from colorama import init, Fore
@@ -276,6 +277,33 @@ async def dmmsg(interaction: discord.Interaction, user: discord.User, message: s
         await send_embed_notification(interaction, "🚫 ვერ მოხერხდა გაგზავნა", f"{user.mention} არ იღებს პირად შეტყობინებებს.")
     except discord.HTTPException as e:
         await send_embed_notification(interaction, "❌ შეცდომა შეტყობინების გაგზავნისას", f"დეტალები: {e}")
+
+
+@bot.tree.command(name="invisibletext", description="გააქრო ჩატი უხილავი ტექსტით")
+async def invisibletext(interaction: discord.Interaction):
+    await bot.wait_until_ready()
+
+    try:
+        # Interaction-ზე ვპასუხობთ ჩუმად, რომელსაც მხოლოდ user ნახავს
+        await interaction.response.send_message("✅ წარმატებით გაიგზავნა უხილავი შეტყობინება.", ephemeral=True)
+
+        # დაველოდოთ ცოტა დრო, რომ interaction-ის ვადა არ გასულიყო
+        await asyncio.sleep(1)
+
+        # ახლა ვReply-ებთ ჩვენს "✅" შეტყობინებას
+        invisible_char = "\u200B"  # უხილავი სიმბოლო
+        line_count = 1000
+        message = (invisible_char + "\n") * line_count
+
+        # Reply-ება "followup"-ით
+        message_sent = await interaction.followup.send(content=message, ephemeral=False)
+
+        # დაველოდოთ 5 წამი და შემდეგ წავშალოთ
+        await asyncio.sleep(5)
+
+        # მხოლოდ მაშინ წავშლით, თუ message_sent ისევ არსებობს
+        try:
+            await message_sent.delete()
 
 # /giveaccess command - ONLY FOR BOT OWNER
 @app_commands.describe(
