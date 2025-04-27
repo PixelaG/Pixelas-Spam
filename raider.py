@@ -156,7 +156,7 @@ def dm_cooldown(seconds: int):
 class SpamButton(discord.ui.View):
     def __init__(self, message_content: str):
         super().__init__(timeout=180)
-        self.message_content = message_content
+        self.message = message
         self.last_clicked = {}
 
     @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
@@ -178,7 +178,7 @@ class SpamButton(discord.ui.View):
         await interaction.response.defer(thinking=False)
 
         for _ in range(5):
-            await interaction.channel.send(self.message_content)
+            await interaction.followup.send(self.message_content)
 
 # Single-use button
 class SingleUseButton(discord.ui.View):
