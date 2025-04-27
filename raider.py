@@ -154,15 +154,30 @@ def dm_cooldown(seconds: int):
 
 # Spam button
 class SpamButton(discord.ui.View):
-    def __init__(self, message):
-        super().__init__()
-        self.message = message
+    def __init__(self):
+        super().__init__(timeout=180)
+        self.cooldowns = {}  # user_id: timestamp ბოლო დაჭერიდან
 
-    @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.red)
-    async def spam_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer()
-        for _ in range(5):
-            await interaction.followup.send(self.message)
+    @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
+    async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
+        now = discord.utils.utcnow().timestamp()
+        last_click = self.cooldowns.get(interaction.user.id, 0)
+
+        if now - last_click < 2:  # თუ 2 წამზე ნაკლებია
+            await interaction.response.send_message(
+                "გთხოვ დაელოდე 2 წამს წინა დაჭერიდან!",
+                ephemeral=True
+            )
+            return
+        
+        # განვაახლოთ ბოლო დაჭერის დრო
+        self.cooldowns[interaction.user.id] = now
+
+        # აქ უკვე ნორმალური მოქმედება
+        await interaction.response.send_message(
+            f"{interaction.user.mention} დააჭირა გასპამვას!",
+            ephemeral=True
+        )
 
 # Single-use button
 class SingleUseButton(discord.ui.View):
