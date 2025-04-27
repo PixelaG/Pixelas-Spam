@@ -166,9 +166,9 @@ class SpamButton(discord.ui.View):
 
         last_time = self.last_clicked.get(user_id, 0)
 
-        if now - last_time < 2:
+        if now - last_time < 3:
             await interaction.response.send_message(
-                "გთხოვთ დაელოდოთ 2 წამი სანამ ისევ დააჭერთ.", 
+                "გთხოვთ დაელოდოთ 3 წამი სანამ ისევ დააჭერთ.", 
                 ephemeral=True
             )
             return
