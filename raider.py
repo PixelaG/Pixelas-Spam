@@ -154,9 +154,10 @@ def dm_cooldown(seconds: int):
 
 # Spam button
 class SpamButton(discord.ui.View):
-    def __init__(self):
+    def __init__(self, message):
         super().__init__(timeout=180)
-        self.cooldowns = {}  # user_id: timestamp ბოლო დაჭერიდან
+        self.message = message  # ახლა შეგიძლია message გამოიყენო კლასში
+        self.cooldowns = {}
 
     @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
     async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
