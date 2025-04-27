@@ -157,6 +157,7 @@ class SpamButton(discord.ui.View):
     def __init__(self, message: str):
         super().__init__(timeout=180)
         self.message_content = message
+        self.last_clicked = {}
 
     @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
     async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
