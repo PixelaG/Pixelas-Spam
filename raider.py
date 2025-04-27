@@ -191,7 +191,7 @@ class SingleUseButton(discord.ui.View):
     async def send_message(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not self.sent:
             try:
-                await interaction.channel.send(self.message)  # აქ იგზავნება სუფთად, Reply-ის გარეშე
+                await interaction.followup.send(self.message)  # აქ იგზავნება სუფთად, Reply-ის გარეშე
                 self.sent = True
                 await interaction.response.edit_message(view=None)  # ღილაკის გაქრობა ან დაკეტვა
             except Exception as e:
