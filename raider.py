@@ -362,7 +362,7 @@ async def giveaccess(interaction: discord.Interaction, user: discord.User, durat
             inline=False
         )
         log_embed.set_thumbnail(url=target_member.display_avatar.url)
-        log_embed.set_footer(text=f"ID: {target_member.id} | MongoDB Entry ID: {access_entry['_id']}")
+        log_embed.set_footer(text=f"ID: {target_member.id}")
 
         # ლოგის არხში გაგზავნა
         log_channel = target_guild.get_channel(LOG_CHANNEL_ID)
