@@ -154,31 +154,33 @@ def dm_cooldown(seconds: int):
 
 # Spam button
 class SpamButton(discord.ui.View):
-    def __init__(self, message):
+    def __init__(self, message_content: str):
         super().__init__(timeout=180)
-        self.message = message  # ახლა შეგიძლია message გამოიყენო კლასში
-        self.cooldowns = {}
+        self.message_content = message_content
+        self.last_clicked = {}  # user_id: timestamp
 
     @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
     async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
-        now = discord.utils.utcnow().timestamp()
-        last_click = self.cooldowns.get(interaction.user.id, 0)
+        user_id = interaction.user.id
+        now = time.time()
 
-        if now - last_click < 2:  # თუ 2 წამზე ნაკლებია
+        last_time = self.last_clicked.get(user_id, 0)
+
+        if now - last_time < 2:  # თუ 2 წამზე ნაკლებია გასული
             await interaction.response.send_message(
-                "გთხოვ დაელოდე 2 წამს წინა დაჭერიდან!",
-                ephemeral=True
+                "გთხოვთ დაელოდოთ 2 წამი სანამ ისევ დააჭერთ.", 
+                ephemeral=True  # private მესიჯად
             )
             return
-        
-        # განვაახლოთ ბოლო დაჭერის დრო
-        self.cooldowns[interaction.user.id] = now
 
-        # აქ უკვე ნორმალური მოქმედება
-        await interaction.response.send_message(
-            f"{interaction.user.mention} დააჭირა გასპამვას!",
-            ephemeral=True
-        )
+        # დავიმახსოვროთ ახალი დრო
+        self.last_clicked[user_id] = now
+
+        # გააგზავნე ის შეტყობინება
+        await interaction.channel.send(self.message_content)
+
+        # და პასუხი interaction-ზე, რომ ღილაკი იმუშაოს სწორად
+        await interaction.response.defer()  # არაფერი არ აჩვენოს
 
 # Single-use button
 class SingleUseButton(discord.ui.View):
