@@ -70,7 +70,7 @@ async def check_expired_roles():
                         log_channel = guild.get_channel(entry["log_channel_id"])
                         if log_channel:
                             expired_embed = discord.Embed(
-                                title="⏰ დაკარგა ამოიღო ",
+                                title="⏰ დაკარგა წვდომა ",
                                 description=f"{member.mention}-ს აღარ აქვს {role.name} როლი",
                                 color=discord.Color.red()
                             )
