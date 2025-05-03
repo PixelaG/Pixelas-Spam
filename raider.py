@@ -222,12 +222,9 @@ async def spamraid(interaction: discord.Interaction, message: str):
 
     try:
         # 2. Send main message visibly
-        message_sent = await interaction.followup.send(content=message, ephemeral=False)
-
-        # 3. Send 5 spam replies with 0.5s delay
         for _ in range(5):
-            await message_sent.channel.send(f"{interaction.user.mention} → {message}", reference=message_sent)
-            await asyncio.sleep(0.5)  # პაუზა შეტყობინებებს შორის
+        message_sent = await interaction.followup.send(content=message, ephemeral=False)
+        await asyncio.sleep(0.5)  # პაუზა შეტყობინებებს შორის
 
     except Exception as e:
         print(f"❌ შეცდომა სპამის გაგზავნისას: {e}")
