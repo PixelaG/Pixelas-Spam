@@ -4,3 +4,4 @@ flask
 motor
 pymongo
 aiolimiter
+curl_cffi
