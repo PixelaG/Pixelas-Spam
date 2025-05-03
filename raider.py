@@ -154,59 +154,6 @@ def dm_cooldown(seconds: int):
 
     return app_commands.check(predicate)
 
-# Spam button
-class SpamButton(discord.ui.View):
-    def __init__(self, message: str):
-        super().__init__(timeout=180)
-        self.message_content = message
-        self.last_clicked = {}
-
-    @discord.ui.button(label="გასპამვა", style=discord.ButtonStyle.danger)
-    async def spam(self, interaction: discord.Interaction, button: discord.ui.Button):
-        user_id = interaction.user.id
-        now = time.time()
-
-        last_time = self.last_clicked.get(user_id, 0)
-
-        if now - last_time < 3:
-            await interaction.response.send_message(
-                "გთხოვთ დაელოდოთ 3 წამი სანამ ისევ დააჭერთ.", 
-                ephemeral=True
-            )
-            return
-
-        self.last_clicked[user_id] = now
-
-        await interaction.response.defer(thinking=False)
-
-        for _ in range(5):
-            await interaction.followup.send(self.message_content)
-
-# Single-use button
-class SingleUseButton(discord.ui.View):
-    def __init__(self, message):
-        super().__init__()
-        self.message = message
-        self.sent = False
-
-    @discord.ui.button(label="გაგზავნა", style=discord.ButtonStyle.green)
-    async def send_once(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.sent:
-            await interaction.response.send_message("⛔ უკვე გაგზავნილია!", ephemeral=True)
-            return
-
-        self.sent = True
-        button.disabled = True
-
-        await interaction.response.defer()
-        await interaction.followup.send(self.message)
-
-        try:
-            original_message = await interaction.original_response()
-            await original_message.edit(view=self)
-        except discord.NotFound:
-            print("⚠ ვერ მოხერხდა ღილაკის რედაქტირება — შეტყობინება აღარ არსებობს.")
-
 # /spamraid command
 @app_commands.describe(message="The message you want to spam")
 @bot.tree.command(name="spamraid", description="გაგზავნეთ შეტყობინება 5-ჯერ სპამისთვის")
