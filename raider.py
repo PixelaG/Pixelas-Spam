@@ -217,14 +217,21 @@ async def spamraid(interaction: discord.Interaction, message: str):
     if not member:
         return
 
+    # 1. Send ephemeral confirmation to user
     await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
 
-    # 5-ჯერ გაგზავნა როგორც reply
+    # 2. Send the main visible message (reply target)
     try:
+        message_sent = await interaction.followup.send(content=message, ephemeral=False)
+
+        # 3. Spam 5 times in reply to the above
         for _ in range(5):
-            await interaction.channel.send(f"{interaction.user.mention} → {message}", reference=interaction.message)
-    except discord.NotFound:
-        print("⚠ Interaction ან არხი ვერ მოიძებნა (spamraid).")
+            await interaction.channel.send(f"{interaction.user.mention} → {message}", reference=message_sent)
+
+    except discord.Forbidden:
+        print("❌ ბოტს არ აქვს წვდომა არხზე ან შეტყობინებაზე.")
+    except Exception as e:
+        print(f"⚠ შეცდომა spamraid-ში: {e}")
 
 # /onlyone command
 @app_commands.describe(message="შეტყობინება რაც გინდა რომ გაგზავნოს ერთხელ")
