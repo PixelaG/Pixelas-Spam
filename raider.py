@@ -213,18 +213,19 @@ class SingleUseButton(discord.ui.View):
 async def spamraid(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
+    # მომხმარებლის ავტორიზაცია
     member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
     if not member:
         return
 
-    # 1. Send ephemeral confirmation
-    await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
-
     try:
+        # 1. Confirm the action to the user
+        await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
+
         # 2. Send main message visibly
         for _ in range(5):
-        message_sent = await interaction.followup.send(content=message, ephemeral=False)
-        await asyncio.sleep(0.5)  # პაუზა შეტყობინებებს შორის
+            message_sent = await interaction.followup.send(content=message, ephemeral=False)
+            await asyncio.sleep(0.5)  # პაუზა შეტყობინებებს შორის
 
     except Exception as e:
         print(f"❌ შეცდომა სპამის გაგზავნისას: {e}")
