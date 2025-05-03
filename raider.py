@@ -233,22 +233,24 @@ async def spamraid(interaction: discord.Interaction, message: str):
 
 # /onlyone command
 @app_commands.describe(message="შეტყობინება რაც გინდა რომ გაგზავნოს ერთხელ")
-@bot.tree.command(name="onlyone", description="მხოლოდ ერთხელ გაგზავნის ღილაკით შეტყობინებას")
+@bot.tree.command(name="onlyone", description="მხოლოდ ერთხელ გაგზავნის შეტყობინებას")
 async def onlyone(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
+    # მომხმარებლის ავტორიზაცია
     member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
     if not member:
         return
 
-    embed = discord.Embed(title="🟢 ერთჯერადი გაგზავნის ღილაკი", description=message, color=discord.Color.green())
-    embed.set_footer(text=f"შექმნილია {interaction.user.display_name}")
-
-    view = SingleUseButton(message)
     try:
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-    except discord.NotFound:
-        print("⚠ Interaction ვადა გასულია (onlyone).")
+        # 1. Confirm the action to the user
+        await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
+
+        # 2. Send the message only once
+        await interaction.followup.send(content=message)
+
+    except Exception as e:
+        print(f"❌ შეცდომა სპამის გაგზავნისას: {e}")
 
 # /dmmsg command with cooldown
 @bot.tree.command(name="dmmsg", description="გაგზავნე DM არჩეულ მომხმარებელზე")
