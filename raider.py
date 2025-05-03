@@ -197,7 +197,8 @@ async def onlyone(interaction: discord.Interaction, message: str):
         await interaction.followup.send(content=message)
 
     except Exception as e:
-        print(f"❌ შეცდომა სპამის გაგზავნისას: {e}")
+        print(f"❌ შეცდომა შეტყობინების გაგზავნისას: {e}")
+        await interaction.followup.send("❌ შეცდომა მოხდა შეტყობინების გაგზავნისას.", ephemeral=True)
 
 # /dmmsg command with cooldown
 @bot.tree.command(name="dmmsg", description="გაგზავნე DM არჩეულ მომხმარებელზე")
