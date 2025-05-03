@@ -3,3 +3,4 @@ colorama
 flask
 motor
 pymongo
+aiolimiter
