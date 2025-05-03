@@ -10,7 +10,6 @@ from colorama import init, Fore
 from datetime import datetime, timedelta
 from pymongo import MongoClient 
 import asyncio
-from aiolimiter import AsyncLimiter
 
 # Colorama init
 init(autoreset=True)
@@ -38,7 +37,6 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client["discord_bot"]  # MongoDB მონაცემთა ბაზა
 access_entries = db["access_entries"]  # MongoDB კოლექცია
-limiter = AsyncLimiter(1, 2) 
 
 # Discord bot setup
 intents = discord.Intents.default()
@@ -49,19 +47,6 @@ intents.typing = False
 intents.presences = False
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-
-async def send_once(self, interaction: discord.Interaction):
-    try:
-        await interaction.response.defer()
-        await interaction.followup.send(self.message)
-    except discord.HTTPException as e:
-        if e.status == 429:
-            retry_after = int(e.response.headers.get("Retry-After", 2))
-            print(f"Rate limited. Retrying after {retry_after} seconds...")
-            await asyncio.sleep(retry_after)
-            await interaction.followup.send(self.message)
-        else:
-            print(f"HTTPException: {e}")
 
 async def check_expired_roles():
     """შეამოწმებს და ამოიღებს ვადაგასულ როლებს"""
@@ -207,36 +192,27 @@ class SpamButton(discord.ui.View):
 # Single-use button
 class SingleUseButton(discord.ui.View):
     def __init__(self, message):
-        super().__init__(timeout=180)
+        super().__init__()
         self.message = message
         self.sent = False
 
-    @discord.ui.button(label="გაგზავნა", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="გაგზავნა", style=discord.ButtonStyle.green)
     async def send_once(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.sent:
             await interaction.response.send_message("⛔ უკვე გაგზავნილია!", ephemeral=True)
             return
 
-        async with limiter:
-            try:
-                self.sent = True
-                button.disabled = True
-                await interaction.response.defer()
+        self.sent = True
+        button.disabled = True
 
-                # 🔐 საცდელი გაგზავნა
-                await interaction.followup.send(self.message)
+        await interaction.response.defer()
+        await interaction.followup.send(self.message)
 
-                # ვცდილობთ ღილაკი გავთიშოთ უკვე გაგზავნილ შეტყობინებაზე
-                try:
-                    original_message = await interaction.original_response()
-                    await original_message.edit(view=self)
-                except discord.NotFound:
-                    print("⚠ ვერ ვიპოვე თავდაპირველი interaction (ალბათ გაუქმდა)")
-
-            except discord.HTTPException as e:
-                print(f"❌ HTTPException ღილაკზე: {e}")
-                self.sent = False
-                await interaction.followup.send("⚠ არ მოხერხდა გაგზავნა. სცადეთ თავიდან.", ephemeral=True)
+        try:
+            original_message = await interaction.original_response()
+            await original_message.edit(view=self)
+        except discord.NotFound:
+            print("⚠ ვერ მოხერხდა ღილაკის რედაქტირება — შეტყობინება აღარ არსებობს.")
 
 # /spamraid command
 @app_commands.describe(message="The message you want to spam")
