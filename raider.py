@@ -207,27 +207,36 @@ class SpamButton(discord.ui.View):
 # Single-use button
 class SingleUseButton(discord.ui.View):
     def __init__(self, message):
-        super().__init__()
+        super().__init__(timeout=180)
         self.message = message
         self.sent = False
 
-    @discord.ui.button(label="გაგზავნა", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="გაგზავნა", style=discord.ButtonStyle.success)
     async def send_once(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.sent:
             await interaction.response.send_message("⛔ უკვე გაგზავნილია!", ephemeral=True)
             return
 
-        self.sent = True
-        button.disabled = True
+        async with limiter:
+            try:
+                self.sent = True
+                button.disabled = True
+                await interaction.response.defer()
 
-        await interaction.response.defer()
-        await interaction.followup.send(self.message)
+                # 🔐 საცდელი გაგზავნა
+                await interaction.followup.send(self.message)
 
-        try:
-            original_message = await interaction.original_response()
-            await original_message.edit(view=self)
-        except discord.NotFound:
-            print("⚠ ვერ მოხერხდა ღილაკის რედაქტირება — შეტყობინება აღარ არსებობს.")
+                # ვცდილობთ ღილაკი გავთიშოთ უკვე გაგზავნილ შეტყობინებაზე
+                try:
+                    original_message = await interaction.original_response()
+                    await original_message.edit(view=self)
+                except discord.NotFound:
+                    print("⚠ ვერ ვიპოვე თავდაპირველი interaction (ალბათ გაუქმდა)")
+
+            except discord.HTTPException as e:
+                print(f"❌ HTTPException ღილაკზე: {e}")
+                self.sent = False
+                await interaction.followup.send("⚠ არ მოხერხდა გაგზავნა. სცადეთ თავიდან.", ephemeral=True)
 
 # /spamraid command
 @app_commands.describe(message="The message you want to spam")
