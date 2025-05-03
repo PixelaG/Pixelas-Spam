@@ -222,14 +222,14 @@ async def spamraid(interaction: discord.Interaction, message: str):
         # 1. Confirm the action to the user
         await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
 
-        # 2. Send main message visibly and make sure we use the initial interaction message for follow-up
+        # 2. Send the main message visibly and make sure we use the initial interaction message for follow-up
         for _ in range(5):
-            # Using interaction.channel to send the message directly to the same channel
-            message_sent = await interaction.channel.send(content=message)
+            await interaction.channel.send(content=message)
             await asyncio.sleep(0.5)  # Pause between messages
 
     except Exception as e:
         print(f"❌ შეცდომა სპამის გაგზავნისას: {e}")
+        await interaction.followup.send("❌ შეცდომა მოხდა სპამის გაგზავნისას.", ephemeral=True)
 
 # /onlyone command
 @app_commands.describe(message="შეტყობინება რაც გინდა რომ გაგზავნოს ერთხელ")
