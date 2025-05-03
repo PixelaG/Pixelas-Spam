@@ -209,7 +209,7 @@ class SingleUseButton(discord.ui.View):
 
 # /spamraid command
 @app_commands.describe(message="The message you want to spam")
-@bot.tree.command(name="spamraid", description="გაგზავნეთ შეტყობინება და შექმენით ღილაკი სპამისთვის")
+@bot.tree.command(name="spamraid", description="გაგზავნეთ შეტყობინება 5-ჯერ სპამისთვის")
 async def spamraid(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
@@ -217,14 +217,14 @@ async def spamraid(interaction: discord.Interaction, message: str):
     if not member:
         return
 
-    embed = discord.Embed(title="💥 გასასპამი ტექსტი 💥", description=message, color=discord.Color(0x2f3136))
-    embed.set_footer(text=f"შექმნილია {interaction.user.display_name}")
+    await interaction.response.send_message("✅ შეტყობინება გაიგზავნა წარმატებით!", ephemeral=True)
 
-    view = SpamButton(message)
+    # 5-ჯერ გაგზავნა როგორც reply
     try:
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        for _ in range(5):
+            await interaction.channel.send(f"{interaction.user.mention} → {message}", reference=interaction.message)
     except discord.NotFound:
-        print("⚠ Interaction ვადა გასულია (spamraid).")
+        print("⚠ Interaction ან არხი ვერ მოიძებნა (spamraid).")
 
 # /onlyone command
 @app_commands.describe(message="შეტყობინება რაც გინდა რომ გაგზავნოს ერთხელ")
