@@ -37,6 +37,7 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client["discord_bot"]  # MongoDB მონაცემთა ბაზა
 access_entries = db["access_entries"]  # MongoDB კოლექცია
+limiter = AsyncLimiter(1, 2) 
 
 # Discord bot setup
 intents = discord.Intents.default()
@@ -47,6 +48,19 @@ intents.typing = False
 intents.presences = False
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+async def send_once(self, interaction: discord.Interaction):
+    try:
+        await interaction.response.defer()
+        await interaction.followup.send(self.message)
+    except discord.HTTPException as e:
+        if e.status == 429:
+            retry_after = int(e.response.headers.get("Retry-After", 2))
+            print(f"Rate limited. Retrying after {retry_after} seconds...")
+            await asyncio.sleep(retry_after)
+            await interaction.followup.send(self.message)
+        else:
+            print(f"HTTPException: {e}")
 
 async def check_expired_roles():
     """შეამოწმებს და ამოიღებს ვადაგასულ როლებს"""
