@@ -161,7 +161,7 @@ async def spamraid(interaction: discord.Interaction, message: str):
     await bot.wait_until_ready()
 
     # მომხმარებლის ავტორიზაცია
-    member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
+    member = await check_user_permissions(interaction, 1368589143546003587, 1005186618031869952)
     if not member:
         return
 
