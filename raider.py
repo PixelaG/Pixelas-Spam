@@ -349,7 +349,7 @@ async def giveaccess(interaction: discord.Interaction, user: discord.User, durat
         
         # Embed ლოგის შექმნა
         log_embed = discord.Embed(
-            title="🎟 წვდომა მინიჭებულია",
+            title="🎟 წვდომა მინიჭებულია (GLOBAL BOT)",
             color=discord.Color.green()
         )
         log_embed.add_field(
