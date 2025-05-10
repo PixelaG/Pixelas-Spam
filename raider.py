@@ -273,33 +273,33 @@ async def invisibletext(interaction: discord.Interaction):
         pass
 
 
-@bot.tree.command(name="freespam", description="გააგზავნე 5 ჯერ რეკლამა ჩატში")
-async def freespam(interaction: discord.Interaction):
+@bot.tree.command(name="freespam", description="გააქრო ჩატი უხილავი ტექსტით")
+async def invisibletext(interaction: discord.Interaction):
     await bot.wait_until_ready()
 
     try:
-        # გაუგზავნე მომხმარებელს მხოლოდ მასზე ხილული შეტყობინება
-        await interaction.response.send_message("✅ წარმატებით გაეშვა სპამი!", ephemeral=True)
+        # Interaction-ზე ვპასუხობთ ჩუმად, რომელსაც მხოლოდ user ნახავს
+        await interaction.response.send_message("✅ წარმატებით გაიგზავნა Free Spam შეტყობინება.", ephemeral=True)
 
+        # დაველოდოთ ცოტა დრო, რომ interaction-ის ვადა არ გასულიყო
         await asyncio.sleep(1)
 
-        spam_text = (
-            "⠀\n" * 150 +
+        # Reply ბოტის მხრიდან
+        content = (
+            "\n" * 200 +  # ბევრი ცარიელი ხაზი, რომ დამალოს წინა მესიჯები
             "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
             "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
             "> უფასოდ : https://discord.gg/byScSM6T9Q"
         )
 
-        # პირველი spam შეტყობინება, რომელსაც დანარჩენები უპასუხებენ
-        first_msg = await interaction.channel.send(spam_text)
+        await interaction.followup.send(content=content, ephemeral=False)
 
-        # დანარჩენი 4 შეტყობინება, რომლებიც reply იქნებიან პირველზე
-        for _ in range(5):
-            await interaction.followup.send(content=spam_text, reference=first_msg)
-            await asyncio.sleep(0.5)
-
-    except Exception as e:
-        print(f"შეცდომა /freespam-ში: {e}")
+    except discord.HTTPException:
+        pass
+    except discord.InteractionNotFound:
+        pass
+    except Exception:
+        pass
         
 
 
