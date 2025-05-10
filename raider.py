@@ -239,6 +239,10 @@ async def dmmsg(interaction: discord.Interaction, user: discord.User, message: s
 async def invisibletext(interaction: discord.Interaction):
     await bot.wait_until_ready()
 
+    member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
+    if not member:
+        return
+
     try:
         # Interaction-ზე ვპასუხობთ ჩუმად, რომელსაც მხოლოდ user ნახავს
         await interaction.response.send_message("✅ წარმატებით გაიგზავნა უხილავი შეტყობინება.", ephemeral=True)
@@ -277,6 +281,10 @@ async def invisibletext(interaction: discord.Interaction):
 async def invisibletext(interaction: discord.Interaction):
     await bot.wait_until_ready()
 
+    member = await check_user_permissions(interaction, 1005186618031869952)
+    if not member:
+        return
+
     try:
         await interaction.response.send_message("✅ წარმატებით გაიგზავნა Free Spam შეტყობინება.", ephemeral=True)
         await asyncio.sleep(1)
@@ -289,7 +297,7 @@ async def invisibletext(interaction: discord.Interaction):
             hidden_lines +
             "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
             "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
-            "> უფასოდ : https://discord.gg/byScSM6T9Q"
+            "> Link : https://discord.gg/byScSM6T9Q"
         )
 
         for _ in range(5):  # გაიგზავნოს 5-ჯერ
