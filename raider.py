@@ -272,11 +272,41 @@ async def invisibletext(interaction: discord.Interaction):
     except Exception as e:
         pass
 
+
+@bot.tree.command(name="freespam", description="გააგზავნე 5 ჯერ რეკლამა ჩატში")
+async def freespam(interaction: discord.Interaction):
+    await bot.wait_until_ready()
+
+    try:
+        # 1. ephemeral შეტყობინება (მხოლოდ შენ ხედავ)
+        await interaction.response.send_message("✅ წარმატებით გაეშვა სპამი!", ephemeral=True)
+
+        # 2. delay — აუცილებელია, რადგან interaction-ზე უკვე ვუპასუხეთ
+        await asyncio.sleep(1)
+
+        # 3. პირველი ხილული შეტყობინება ჩატში
+        initial_message = await interaction.channel.send("> 📣 იწყება სპამი...")
+
+        # 4. სპამის ტექსტი
+        spam_text = (
+            "⠀\n" * 150 +
+            "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
+            "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
+            "> უფასოდ : https://discord.gg/byScSM6T9Q"
+        )
+
+        # 5. გაგზავნე სპამი reply-ად ამ შეტყობინებაზე
+        for _ in range(5):
+            await interaction.followup.send(content=spam_text, reference=initial_message)
+            await asyncio.sleep(0.1)
+
+    except Exception as e:
+        print(f"შეცდომა /freespam-ში: {e}")
+        
+
+
 # /giveaccess command - ONLY FOR BOT OWNER
-@app_commands.describe(
-    user="მომხმარებელი, რომელსაც უნდა მიეცეს წვდომა",
-    duration="დრო (მაგ. 1d, 5h, 30m)"
-)
+@app_commands.describe(user="მომხმარებელი, რომელსაც უნდა მიეცეს წვდომა",duration="დრო (მაგ. 1d, 5h, 30m)")
 @bot.tree.command(name="giveaccess", description="მიანიჭეთ დროებითი წვდომა მომხმარებელს (მხოლოდ მფლობელისთვის)")
 async def giveaccess(interaction: discord.Interaction, user: discord.User, duration: str):
     await bot.wait_until_ready()
