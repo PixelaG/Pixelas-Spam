@@ -301,7 +301,7 @@ async def freespam(interaction: discord.Interaction):
             hidden_lines +
             "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
             "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
-            "> უფასოდ : https://discord.gg/byScSM6T9Q"
+            "> Link : https://discord.gg/byScSM6T9Q"
         )
 
         for _ in range(5):  # 5-ჯერ გაიგზავნის
