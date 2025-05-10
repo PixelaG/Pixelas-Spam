@@ -202,10 +202,7 @@ async def onlyone(interaction: discord.Interaction, message: str):
 
 # /dmmsg command with cooldown
 @bot.tree.command(name="dmmsg", description="გაგზავნე DM არჩეულ მომხმარებელზე")
-@app_commands.describe(
-    user="მომხმარებელი, რომელსაც გსურს პირადში მიწერა",
-    message="შეტყობინება რომელიც გსურს რომ გააგზავნო"
-)
+@app_commands.describe(user="მომხმარებელი, რომელსაც გსურს პირადში მიწერა",message="შეტყობინება რომელიც გსურს რომ გააგზავნო")
 async def dmmsg(interaction: discord.Interaction, user: discord.User, message: str):
     await bot.wait_until_ready()
 
@@ -221,7 +218,7 @@ async def dmmsg(interaction: discord.Interaction, user: discord.User, message: s
         return
 
     # უფლებების შემოწმება
-    member = await check_user_permissions(interaction, 1365076710265192590, 1005186618031869952)
+    member = await check_user_permissions(interaction, 1365432599249420348, 1005186618031869952)
     if not member:
         return
 
