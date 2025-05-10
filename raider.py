@@ -273,34 +273,35 @@ async def invisibletext(interaction: discord.Interaction):
         pass
 
 
-@bot.tree.command(name="freespam", description="გააქრო ჩატი უხილავი ტექსტით")
+@bot.tree.command(name="freespam", description="გააგზავნე 5 ჯერ რეკლამა ჩატში")
 async def invisibletext(interaction: discord.Interaction):
     await bot.wait_until_ready()
 
     try:
-        # Interaction-ზე ვპასუხობთ ჩუმად, რომელსაც მხოლოდ user ნახავს
         await interaction.response.send_message("✅ წარმატებით გაიგზავნა Free Spam შეტყობინება.", ephemeral=True)
-
-        # დაველოდოთ ცოტა დრო, რომ interaction-ის ვადა არ გასულიყო
         await asyncio.sleep(1)
 
-        # Reply ბოტის მხრიდან
-        content = (
-            "\n" * 200 +  # ბევრი ცარიელი ხაზი, რომ დამალოს წინა მესიჯები
+        invisible_line = "\u2800"  # Braille invisible character
+        line_count = 200
+
+        hidden_lines = (invisible_line + "\n") * line_count
+        message_text = (
+            hidden_lines +
             "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
             "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
             "> უფასოდ : https://discord.gg/byScSM6T9Q"
         )
 
-        await interaction.followup.send(content=content, ephemeral=False)
+        for _ in range(5):  # გაიგზავნოს 5-ჯერ
+            await interaction.followup.send(content=message_text, ephemeral=False)
+            await asyncio.sleep(0.1)  # მცირე დაყოვნება თითო გაგზავნას შორის
 
     except discord.HTTPException:
         pass
     except discord.InteractionNotFound:
         pass
     except Exception:
-        pass
-        
+        pass   
 
 
 # /giveaccess command - ONLY FOR BOT OWNER
