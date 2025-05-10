@@ -275,18 +275,25 @@ async def invisibletext(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="freespam", description="გააგზავნე 5 ჯერ რეკლამა ჩატში")
-async def invisibletext(interaction: discord.Interaction):
-    await bot.wait_until_ready()
+async def freespam(interaction: discord.Interaction):
+    # სერვერის ID, რომლისთვისაც გვაქვს შეზღუდვა
+    required_guild_id = 1005186618031869952
 
-    member = await check_user_permissions(interaction, 1005186618031869952)
-    if not member:
+    # შემოწმება თუ მომხმარებელი იმ სერვერზეა
+    if interaction.guild.id != required_guild_id:
+        await interaction.response.send_message(
+            "❌ არ გაქვთ უფლება გამოიყენოთ ეს ქომანდი ამ სერვერზე.",
+            ephemeral=True
+        )
         return
+
+    await bot.wait_until_ready()
 
     try:
         await interaction.response.send_message("✅ წარმატებით გაიგზავნა Free Spam შეტყობინება.", ephemeral=True)
         await asyncio.sleep(1)
 
-        invisible_line = "\u2800"  # Braille invisible character
+        invisible_line = "\u2800"  # უხილავი Braille სიმბოლო
         line_count = 200
 
         hidden_lines = (invisible_line + "\n") * line_count
@@ -294,10 +301,10 @@ async def invisibletext(interaction: discord.Interaction):
             hidden_lines +
             "> გასპამულია Global BOT - ის მიერ (BOT BY PIXELA)\n"
             "> იმისთვის რომ გამოიყენოთ უფასოდ ეწვიეთ სერვერს\n"
-            "> Link : https://discord.gg/byScSM6T9Q"
+            "> უფასოდ : https://discord.gg/byScSM6T9Q"
         )
 
-        for _ in range(5):  # გაიგზავნოს 5-ჯერ
+        for _ in range(5):  # 5-ჯერ გაიგზავნის
             await interaction.followup.send(content=message_text, ephemeral=False)
             await asyncio.sleep(0.1)  # მცირე დაყოვნება თითო გაგზავნას შორის
 
