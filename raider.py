@@ -279,10 +279,10 @@ async def freespam(interaction: discord.Interaction):
     # სერვერის ID, რომლისთვისაც გვაქვს შეზღუდვა
     required_guild_id = 1005186618031869952
 
-    # შემოწმება თუ მომხმარებელი იმ სერვერზეა
-    if interaction.guild.id != required_guild_id:
+    # შემოწმება თუ მომხმარებელი არის ამ სერვერზე
+    if required_guild_id not in [guild.id for guild in interaction.user.mutual_guilds]:
         await interaction.response.send_message(
-            "❌ არ გაქვთ უფლება გამოიყენოთ ეს ქომანდი ამ სერვერზე.",
+            "❌ თქვენ უნდა იყოთ 1005186618031869952-ID სერვერზე, რათა გამოიყენოთ ეს ქომანდი.",
             ephemeral=True
         )
         return
@@ -313,7 +313,7 @@ async def freespam(interaction: discord.Interaction):
     except discord.InteractionNotFound:
         pass
     except Exception:
-        pass   
+        pass
 
 
 # /giveaccess command - ONLY FOR BOT OWNER
